@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>测试效能汇总报告</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.6;padding:20px}
+.container{max-width:1600px;margin:0 auto}
+.header{background:linear-gradient(135deg,#0369a1,#0c4a6e);color:#fff;padding:24px 32px;border-radius:16px;margin-bottom:24px}
+.header h1{font-size:24px;font-weight:700}
+.section{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.section-title{font-size:15px;font-weight:700;color:#0891b2;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:'■';color:#0891b2}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{background:#fff;border-radius:8px;padding:16px}
+.chart-title{font-weight:600;font-size:13px;color:#0891b2;margin-bottom:12px}
+.chart-title::before{content:'■';margin-right:6px;color:#0891b2}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:8px 10px;text-align:center;border:1px solid #e5e7eb}
+th{background:#f8fafc;font-weight:600;color:#374151}
+.highlight-red{color:#dc2626}
+.highlight-green{color:#16a34a}
+.trend-up{color:#dc2626}
+.trend-down{color:#16a34a}
+.trend-stable{color:#6b7280}
+.phase-table th{background:#f0fdfa;color:#0891b2}
+.phase-table .phase-name{text-align:left;font-weight:600}
+.phase-table .test-row{background:#fef2f2}
+.phase-table .total-row{background:#ecfeff;font-weight:600;color:#0891b2}
+.note{font-size:11px;color:#94a3b8;margin-top:8px}
+.note .test-highlight{color:#dc2626}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>📊 测试效能汇总报告</h1>
+</div>
+
+<!-- 0. 测试相关工时占比趋势 -->
+<div class="section" style="background:linear-gradient(135deg,#fef2f2 0%,#fff 100%);border:2px solid #fca5a5;">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+<span style="font-size:16px;">📊</span>
+<span style="font-weight:700;color:#b91c1c;font-size:14px;">测试相关工时占比趋势</span>
+<span style="font-size:11px;color:#64748b;margin-left:auto;">（QC用例 + 测试 + 预发）÷ 总工时 × 100%</span>
+</div>
+<div id="chartTestWorkPctTrend" style="width:100%;height:280px;"></div>
+</div>
+
+<!-- 1. 各阶段工期与工时逐月趋势 -->
+<div class="section">
+<div class="section-title">各阶段工期与工时逐月趋势</div>
+<div class="chart-row">
+<div class="chart-box">
+<div class="chart-title">各阶段工期逐月趋势（日历天）</div>
+<div id="chartScheduleMonthly" style="width:100%;height:300px;"></div>
+</div>
+<div class="chart-box">
+<div class="chart-title">按月各阶段工时占比（估分人天）</div>
+<div id="chartMonthlyPhasePct" style="width:100%;height:300px;"></div>
+<div style="text-align:right;font-size:11px;color:#64748b;margin-top:4px;">
+<span>按月各阶段工时（人天）占比</span>
+<span style="margin-left:16px;color:#dc2626;">测试占比(%)</span>
+</div>
+</div>
+</div>
+
+<!-- 各阶段月度占比与环比变化 -->
+<div class="section">
+<div class="section-title">各阶段月度占比与环比变化</div>
+<div style="margin-bottom:8px;font-size:11px;color:#64748b;">pp = 百分点 <span style="color:#dc2626;margin-left:12px;">▲ 测试阶段重点关注</span></div>
+<table class="phase-table">
+<thead>
+<tr>
+<th rowspan="2">阶段</th>
+<th colspan="2">2025-10</th>
+<th colspan="2">2025-11</th>
+<th colspan="2">2025-12</th>
+<th colspan="2">2026-01</th>
+<th colspan="2">2026-02</th>
+</tr>
+<tr>
+<th>占比</th><th>环比</th>
+<th>占比</th><th>环比</th>
+<th>占比</th><th>环比</th>
+<th>占比</th><th>环比</th>
+<th>占比</th><th>环比</th>
+</tr>
+</thead>
+<tbody>
+<tr><td class="phase-name" style="color:#7c3aed;">设计评审</td><td>4.9%</td><td>—</td><td>4.7%</td><td class="trend-down">↓0.2pp</td><td>4.8%</td><td class="trend-up">↑0.1pp</td><td>5.1%</td><td class="trend-up">↑0.3pp</td><td>4.5%</td><td class="trend-down">↓0.6pp</td></tr>
+<tr><td class="phase-name" style="color:#0369a1;">研发</td><td>54%</td><td>—</td><td>59%</td><td class="trend-up">↑5pp</td><td>60.2%</td><td class="trend-up">↑1.2pp</td><td>57.6%</td><td class="trend-down">↓2.6pp</td><td>62.4%</td><td class="trend-up">↑4.8pp</td></tr>
+<tr><td class="phase-name" style="color:#0ea5e9;">QC用例</td><td>5.6%</td><td>—</td><td>4.2%</td><td class="trend-down">↓1.4pp</td><td>3.9%</td><td class="trend-down">↓0.3pp</td><td>3.3%</td><td class="trend-down">↓0.6pp</td><td>3.1%</td><td class="trend-down">↓0.2pp</td></tr>
+<tr class="test-row"><td class="phase-name" style="color:#dc2626;">▲ 测试</td><td>28%</td><td>—</td><td>24.5%</td><td class="trend-down">↓3.5pp</td><td>23.2%</td><td class="trend-down">↓1.3pp</td><td>25.6%</td><td class="trend-up">↑2.4pp</td><td>22.3%</td><td class="trend-down">↓3.3pp</td></tr>
+<tr><td class="phase-name" style="color:#0284c7;">预发</td><td>7.5%</td><td>—</td><td>7.6%</td><td class="trend-up">↑0.1pp</td><td>7.9%</td><td class="trend-up">↑0.3pp</td><td>8.4%</td><td class="trend-up">↑0.5pp</td><td>7.6%</td><td class="trend-down">↓0.8pp</td></tr>
+<tr class="total-row"><td class="phase-name">总工时(人天)</td><td>1960</td><td>—</td><td>4404</td><td class="trend-up">↑124.7%</td><td>4938</td><td class="trend-up">↑12.1%</td><td>4623</td><td class="trend-down">↓6.4%</td><td>3157</td><td class="trend-down">↓31.7%</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- 2. 测试阶段占比对比表 -->
+<div class="section">
+<div class="section-title">测试阶段占比：各业务线当月实际 vs 各月团队均值</div>
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr>
+<th rowspan="2">业务线</th>
+<th rowspan="2">该部门平均<br>测试占比</th>
+<th colspan="3">2025-10</th>
+<th colspan="3">2025-11</th>
+<th colspan="3">2025-12</th>
+<th colspan="3">2026-01</th>
+<th colspan="3">2026-02</th>
+<th rowspan="2">趋势</th>
+</tr>
+<tr>
+<th>当月</th><th style="font-size:10px;color:#64748b;">VS均值41%</th><th style="font-size:10px;color:#64748b;">VS上月</th>
+<th>当月</th><th style="font-size:10px;color:#64748b;">VS均值36.3%</th><th style="font-size:10px;color:#64748b;">VS上月</th>
+<th>当月</th><th style="font-size:10px;color:#64748b;">VS均值35%</th><th style="font-size:10px;color:#64748b;">VS上月</th>
+<th>当月</th><th style="font-size:10px;color:#64748b;">VS均值37.4%</th><th style="font-size:10px;color:#64748b;">VS上月</th>
+<th>当月</th><th style="font-size:10px;color:#64748b;">VS均值33%</th><th style="font-size:10px;color:#64748b;">VS上月</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left;font-weight:600;">现货</td><td>52.6%</td><td>47.3%</td><td class="highlight-red">↑+6.3pp</td><td>—</td><td>54.0%</td><td class="highlight-red">↑+17.7pp</td><td class="highlight-red">↑+6.7pp</td><td>44.5%</td><td class="highlight-red">↑+9.5pp</td><td class="trend-down">↓-9.5pp</td><td>73.6%</td><td class="highlight-red">↑+36.2pp</td><td class="highlight-red">↑+29.1pp</td><td>43.4%</td><td class="highlight-red">↑+10.4pp</td><td class="trend-down">↓-30.2pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">闪兑</td><td>49.2%</td><td>46.4%</td><td class="highlight-red">↑+5.4pp</td><td>—</td><td>20.8%</td><td class="trend-down">↓-15.5pp</td><td class="trend-down">↓-25.6pp</td><td>83.9%</td><td class="highlight-red">↑+48.9pp</td><td class="highlight-red">↑+63.1pp</td><td>47.0%</td><td class="highlight-red">↑+9.6pp</td><td class="trend-down">↓-36.9pp</td><td>47.9%</td><td class="highlight-red">↑+14.9pp</td><td class="highlight-red">↑+0.9pp</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">统一账户</td><td>43.4%</td><td>49.3%</td><td class="highlight-red">↑+8.3pp</td><td>—</td><td>35.6%</td><td>~-0.7pp</td><td class="trend-down">↓-13.7pp</td><td>36.2%</td><td>~1.2pp</td><td class="highlight-red">↑+0.6pp</td><td>58.1%</td><td class="highlight-red">↑+20.7pp</td><td class="highlight-red">↑+21.9pp</td><td>37.8%</td><td class="highlight-red">↑+4.8pp</td><td class="trend-down">↓-20.3pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">合约</td><td>42.5%</td><td>43.2%</td><td class="highlight-red">↑+2.2pp</td><td>—</td><td>37.3%</td><td>~1.0pp</td><td class="trend-down">↓-5.9pp</td><td>43.8%</td><td class="highlight-red">↑+8.8pp</td><td class="highlight-red">↑+6.5pp</td><td>55.3%</td><td class="highlight-red">↑+17.9pp</td><td class="highlight-red">↑+11.5pp</td><td>33.1%</td><td>~0.1pp</td><td class="trend-down">↓-22.2pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">交易工具</td><td>41.7%</td><td>48.5%</td><td class="highlight-red">↑+7.5pp</td><td>—</td><td>37.4%</td><td>~1.1pp</td><td class="trend-down">↓-11.1pp</td><td>49.6%</td><td class="highlight-red">↑+14.6pp</td><td class="highlight-red">↑+12.2pp</td><td>36.0%</td><td>~-1.4pp</td><td class="trend-down">↓-13.6pp</td><td>37.1%</td><td class="highlight-red">↑+4.1pp</td><td class="highlight-red">↑+1.1pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">交易风控</td><td>40.0%</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>40.0%</td><td class="highlight-red">↑+5.0pp</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">增长工具</td><td>40.0%</td><td>45.7%</td><td class="highlight-red">↑+4.7pp</td><td>—</td><td>37.3%</td><td>~1.0pp</td><td class="trend-down">↓-8.4pp</td><td>35.3%</td><td>~0.3pp</td><td class="trend-down">↓-2.0pp</td><td>39.9%</td><td class="highlight-red">↑+2.5pp</td><td class="highlight-red">↑+4.6pp</td><td>41.6%</td><td class="highlight-red">↑+8.6pp</td><td class="highlight-red">↑+1.7pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">资管</td><td>40.0%</td><td>37.1%</td><td class="trend-down">↓-3.9pp</td><td>—</td><td>44.0%</td><td class="highlight-red">↑+7.7pp</td><td class="highlight-red">↑+6.9pp</td><td>41.5%</td><td class="highlight-red">↑+6.5pp</td><td class="trend-down">↓-2.5pp</td><td>41.5%</td><td class="highlight-red">↑+4.1pp</td><td>→0pp</td><td>36.0%</td><td class="highlight-red">↑+3.0pp</td><td class="trend-down">↓-5.5pp</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">分站</td><td>39.9%</td><td>—</td><td>—</td><td>—</td><td>37.5%</td><td>~1.2pp</td><td>—</td><td>38.0%</td><td class="highlight-red">↑+3.0pp</td><td class="highlight-red">↑+0.5pp</td><td>35.2%</td><td class="trend-down">↓-2.2pp</td><td class="trend-down">↓-2.8pp</td><td>48.8%</td><td class="highlight-red">↑+15.8pp</td><td class="highlight-red">↑+13.6pp</td><td class="highlight-red">上升</td></tr>
+<tr><td style="text-align:left;font-weight:600;">理财</td><td>39.8%</td><td>51.3%</td><td class="highlight-red">↑+10.3pp</td><td>—</td><td>36.8%</td><td>~0.5pp</td><td class="trend-down">↓-14.5pp</td><td>39.5%</td><td class="highlight-red">↑+4.5pp</td><td class="highlight-red">↑+2.7pp</td><td>34.8%</td><td class="trend-down">↓-2.6pp</td><td class="trend-down">↓-4.7pp</td><td>36.6%</td><td class="highlight-red">↑+3.6pp</td><td class="highlight-red">↑+1.8pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">期权</td><td>39.7%</td><td>50.9%</td><td class="highlight-red">↑+9.9pp</td><td>—</td><td>43.8%</td><td class="highlight-red">↑+7.5pp</td><td class="trend-down">↓-7.1pp</td><td>34.5%</td><td>~-0.5pp</td><td class="trend-down">↓-9.3pp</td><td>41.3%</td><td class="highlight-red">↑+3.9pp</td><td class="highlight-red">↑+6.8pp</td><td>28.0%</td><td class="trend-down">↓-5.0pp</td><td class="trend-down">↓-13.3pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">返佣</td><td>39.2%</td><td>41.3%</td><td>~0.3pp</td><td>—</td><td>42.0%</td><td class="highlight-red">↑+5.7pp</td><td class="highlight-red">↑+0.7pp</td><td>36.7%</td><td>~1.7pp</td><td class="trend-down">↓-5.3pp</td><td>40.6%</td><td class="highlight-red">↑+3.2pp</td><td class="highlight-red">↑+3.9pp</td><td>35.5%</td><td class="highlight-red">↑+2.5pp</td><td class="trend-down">↓-5.1pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">核心交易</td><td>39.0%</td><td>29.3%</td><td class="trend-down">↓-11.7pp</td><td>—</td><td>42.0%</td><td class="highlight-red">↑+5.7pp</td><td class="highlight-red">↑+12.7pp</td><td>37.3%</td><td class="highlight-red">↑+2.3pp</td><td class="trend-down">↓-4.7pp</td><td>55.6%</td><td class="highlight-red">↑+18.2pp</td><td class="highlight-red">↑+18.3pp</td><td>30.9%</td><td class="trend-down">↓-2.1pp</td><td class="trend-down">↓-24.7pp</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">用户中心</td><td>37.4%</td><td>—</td><td>—</td><td>—</td><td>30.4%</td><td class="trend-down">↓-5.9pp</td><td>—</td><td>44.4%</td><td class="highlight-red">↑+9.4pp</td><td class="highlight-red">↑+14.0pp</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="highlight-red">上升</td></tr>
+<tr><td style="text-align:left;font-weight:600;">打新</td><td>37.2%</td><td>44.3%</td><td class="highlight-red">↑+3.3pp</td><td>—</td><td>44.9%</td><td class="highlight-red">↑+8.6pp</td><td class="highlight-red">↑+0.6pp</td><td>32.5%</td><td class="trend-down">↓-2.5pp</td><td class="trend-down">↓-12.4pp</td><td>24.1%</td><td class="trend-down">↓-13.3pp</td><td class="trend-down">↓-8.4pp</td><td>40.2%</td><td class="highlight-red">↑+7.2pp</td><td class="highlight-red">↑+16.1pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">资产</td><td>36.7%</td><td>34.6%</td><td class="trend-down">↓-6.4pp</td><td>—</td><td>43.1%</td><td class="highlight-red">↑+6.8pp</td><td class="highlight-red">↑+8.5pp</td><td>35.7%</td><td>~0.7pp</td><td class="trend-down">↓-7.4pp</td><td>29.0%</td><td class="trend-down">↓-8.4pp</td><td class="trend-down">↓-6.7pp</td><td>41.2%</td><td class="highlight-red">↑+8.2pp</td><td class="highlight-red">↑+12.2pp</td><td class="highlight-red">上升</td></tr>
+<tr><td style="text-align:left;font-weight:600;">用户旅程</td><td>36.6%</td><td>41.6%</td><td>~0.6pp</td><td>—</td><td>40.3%</td><td class="highlight-red">↑+4.0pp</td><td class="trend-down">↓-1.3pp</td><td>34.4%</td><td>~-0.6pp</td><td class="trend-down">↓-5.9pp</td><td>33.2%</td><td class="trend-down">↓-4.2pp</td><td class="trend-down">↓-1.2pp</td><td>33.5%</td><td>~0.5pp</td><td class="highlight-red">↑+0.3pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">KYC</td><td>35.5%</td><td>52.8%</td><td class="highlight-red">↑+11.8pp</td><td>—</td><td>35.5%</td><td>~-0.8pp</td><td class="trend-down">↓-17.3pp</td><td>28.4%</td><td class="trend-down">↓-6.6pp</td><td class="trend-down">↓-7.1pp</td><td>32.9%</td><td class="trend-down">↓-4.5pp</td><td class="highlight-red">↑+4.5pp</td><td>27.8%</td><td class="trend-down">↓-5.2pp</td><td class="trend-down">↓-5.1pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">行情中台</td><td>33.6%</td><td>30.2%</td><td class="trend-down">↓-10.8pp</td><td>—</td><td>37.2%</td><td>~0.9pp</td><td class="highlight-red">↑+7.0pp</td><td>33.1%</td><td>~-1.9pp</td><td class="trend-down">↓-4.1pp</td><td>36.2%</td><td>~-1.2pp</td><td class="highlight-red">↑+3.1pp</td><td>31.4%</td><td>~-1.6pp</td><td class="trend-down">↓-4.8pp</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">Web3</td><td>31.9%</td><td>24.5%</td><td class="trend-down">↓-16.5pp</td><td>—</td><td>39.4%</td><td class="highlight-red">↑+3.1pp</td><td class="highlight-red">↑+14.9pp</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="highlight-red">上升</td></tr>
+<tr><td style="text-align:left;font-weight:600;">广场</td><td>30.6%</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>41.2%</td><td class="highlight-red">↑+6.2pp</td><td>—</td><td>20.0%</td><td class="trend-down">↓-17.4pp</td><td class="trend-down">↓-21.2pp</td><td>—</td><td>—</td><td>—</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">营销活动</td><td>28.6%</td><td>28.4%</td><td class="trend-down">↓-12.6pp</td><td>—</td><td>27.7%</td><td class="trend-down">↓-8.6pp</td><td class="trend-down">↓-0.7pp</td><td>29.4%</td><td class="trend-down">↓-5.6pp</td><td class="highlight-red">↑+1.7pp</td><td>26.9%</td><td class="trend-down">↓-10.5pp</td><td class="trend-down">↓-2.5pp</td><td>30.4%</td><td class="trend-down">↓-2.6pp</td><td class="highlight-red">↑+3.5pp</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">管理中台</td><td>28.3%</td><td>—</td><td>—</td><td>—</td><td>16.3%</td><td class="trend-down">↓-20.0pp</td><td>—</td><td>28.6%</td><td class="trend-down">↓-6.4pp</td><td class="highlight-red">↑+12.3pp</td><td>—</td><td>—</td><td>—</td><td>40.0%</td><td class="highlight-red">↑+7.0pp</td><td class="highlight-red">↑+11.4pp</td><td class="highlight-red">上升</td></tr>
+<tr><td style="text-align:left;font-weight:600;">社交</td><td>27.6%</td><td>37.4%</td><td class="trend-down">↓-3.6pp</td><td>—</td><td>23.2%</td><td class="trend-down">↓-13.1pp</td><td class="trend-down">↓-14.2pp</td><td>29.3%</td><td class="trend-down">↓-5.7pp</td><td class="highlight-red">↑+6.1pp</td><td>24.6%</td><td class="trend-down">↓-12.8pp</td><td class="trend-down">↓-4.7pp</td><td>23.7%</td><td class="trend-down">↓-9.3pp</td><td class="trend-down">↓-0.9pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">平台基建</td><td>25.3%</td><td>37.8%</td><td class="trend-down">↓-3.2pp</td><td>—</td><td>14.5%</td><td class="trend-down">↓-21.8pp</td><td class="trend-down">↓-23.3pp</td><td>22.0%</td><td class="trend-down">↓-13.0pp</td><td class="highlight-red">↑+7.5pp</td><td>22.7%</td><td class="trend-down">↓-14.7pp</td><td class="highlight-red">↑+0.7pp</td><td>29.5%</td><td class="trend-down">↓-3.5pp</td><td class="highlight-red">↑+6.8pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">PAY</td><td>25.1%</td><td>32.4%</td><td class="trend-down">↓-8.6pp</td><td>—</td><td>28.9%</td><td class="trend-down">↓-7.4pp</td><td class="trend-down">↓-3.5pp</td><td>25.6%</td><td class="trend-down">↓-9.4pp</td><td class="trend-down">↓-3.3pp</td><td>17.7%</td><td class="trend-down">↓-19.7pp</td><td class="trend-down">↓-7.9pp</td><td>20.7%</td><td class="trend-down">↓-12.3pp</td><td class="highlight-red">↑+3.0pp</td><td class="trend-down">下降</td></tr>
+<tr><td style="text-align:left;font-weight:600;">DATA</td><td>24.5%</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>24.5%</td><td class="trend-down">↓-8.5pp</td><td>—</td><td class="trend-stable">稳定</td></tr>
+<tr><td style="text-align:left;font-weight:600;">VIP</td><td>22.8%</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>28.6%</td><td class="trend-down">↓-6.4pp</td><td>—</td><td>23.1%</td><td class="trend-down">↓-14.3pp</td><td class="trend-down">↓-5.5pp</td><td>16.7%</td><td class="trend-down">↓-16.3pp</td><td class="trend-down">↓-6.4pp</td><td class="trend-down">下降</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">⚡ 注：各业务线月度阶段占比为当月真实数据。测试占比高于月均 2pp 以上标红。</p>
+</div>
+
+
+</div>
+
+</div>
+
+<!-- 3. 按需求价值类型汇总（全局） -->
+<div class="container">
+<div class="section">
+<div class="section-title">按需求价值类型汇总（全局）</div>
+<div style="margin-bottom:12px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac;font-size:12px;color:#166534;">💡 按测试工时倒序排列，重点关注测试投入较大的价值类型</div>
+<div style="overflow-x:auto;">
+<table>
+<thead><tr><th>价值类型</th><th>一级分类</th><th>需求数</th><th class="test-highlight" style="color:#dc2626;">测试工时</th><th class="test-highlight" style="color:#dc2626;">均测试</th><th class="test-highlight" style="color:#dc2626;">测试占比</th><th>研发工时</th><th>均研发</th><th>R/T</th><th>平均工期</th><th>Bug数</th><th>业务线数</th></tr></thead>
+<tbody>
+<tr><td style="text-align:left;font-weight:600;">用户体验优化</td><td style="color:#3b82f6;font-weight:500;">产品需求</td><td>1035</td><td style="font-weight:700;color:#dc2626;">1956.4</td><td style="color:#dc2626;">1.89</td><td style="color:#dc2626;">17.6%</td><td>3993.85</td><td>3.86</td><td>2.04</td><td>29.55天</td><td>4492</td><td title="用户中心, 交易工具, 现货, 闪兑, 合约 等25个">25</td></tr>
+<tr><td style="text-align:left;font-weight:600;">新功能</td><td style="color:#3b82f6;font-weight:500;">产品需求</td><td>112</td><td style="font-weight:700;color:#dc2626;">935.8</td><td style="color:#dc2626;">8.36</td><td style="color:#dc2626;">22.8%</td><td>1734.7</td><td>15.49</td><td>1.85</td><td>47.5天</td><td>2164</td><td title="交易工具, 现货, 闪兑, 合约, 期权 等18个">18</td></tr>
+<tr><td style="text-align:left;font-weight:600;">增长活动类</td><td style="color:#3b82f6;font-weight:500;">产品需求</td><td>213</td><td style="font-weight:700;color:#dc2626;">787.7</td><td style="color:#dc2626;">3.7</td><td style="color:#dc2626;">20.9%</td><td>1670.8</td><td>7.84</td><td>2.12</td><td>25.66天</td><td>989</td><td title="交易工具, 现货, 闪兑, 合约, 期权 等19个">19</td></tr>
+<tr><td style="text-align:left;font-weight:600;">后台管理效率提升</td><td style="color:#6b7280;font-weight:500;">其他需求</td><td>287</td><td style="font-weight:700;color:#dc2626;">625.4</td><td style="color:#dc2626;">2.18</td><td style="color:#dc2626;">22.1%</td><td>1334.0</td><td>4.65</td><td>2.13</td><td>32.08天</td><td>803</td><td title="交易工具, 现货, 合约, 期权, 统一账户 等21个">21</td></tr>
+<tr><td style="text-align:left;font-weight:600;">性能优化</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>127</td><td style="font-weight:700;color:#dc2626;">523.7</td><td style="color:#dc2626;">4.12</td><td style="color:#dc2626;">45.8%</td><td>466.5</td><td>3.67</td><td style="color:#dc2626;font-weight:600;">0.89</td><td>28.65天</td><td>338</td><td title="交易工具, 现货, 合约, 期权, 统一账户 等16个">16</td></tr>
+<tr><td style="text-align:left;font-weight:600;">架构升级</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>104</td><td style="font-weight:700;color:#dc2626;">451.4</td><td style="color:#dc2626;">4.34</td><td style="color:#dc2626;">27.8%</td><td>991.6</td><td>9.53</td><td>2.2</td><td>32.68天</td><td>496</td><td title="交易工具, 现货, 合约, 期权, 统一账户 等18个">18</td></tr>
+<tr><td style="text-align:left;font-weight:600;">分站支持</td><td style="color:#3b82f6;font-weight:500;">产品需求</td><td>143</td><td style="font-weight:700;color:#dc2626;">363.9</td><td style="color:#dc2626;">2.54</td><td style="color:#dc2626;">22.5%</td><td>707.0</td><td>4.94</td><td>1.94</td><td>25.1天</td><td>561</td><td title="交易工具, 现货, 闪兑, 行情中台, 理财 等15个">15</td></tr>
+<tr><td style="text-align:left;font-weight:600;">技术优化与支持</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>214</td><td style="font-weight:700;color:#dc2626;">315.5</td><td style="color:#dc2626;">1.47</td><td style="color:#dc2626;">28.6%</td><td>493.4</td><td>2.31</td><td>1.56</td><td>21.74天</td><td>351</td><td title="交易工具, 现货, 闪兑, 合约, 统一账户 等20个">20</td></tr>
+<tr><td style="text-align:left;font-weight:600;">问题修复</td><td style="color:#6b7280;font-weight:500;">其他需求</td><td>205</td><td style="font-weight:700;color:#dc2626;">219.2</td><td style="color:#dc2626;">1.07</td><td style="color:#dc2626;">24.2%</td><td>376.5</td><td>1.84</td><td>1.72</td><td>15.87天</td><td>120</td><td title="交易工具, 现货, 闪兑, 合约, 期权 等20个">20</td></tr>
+<tr><td style="text-align:left;font-weight:600;">其他</td><td style="color:#6b7280;font-weight:500;">其他需求</td><td>83</td><td style="font-weight:700;color:#dc2626;">196.6</td><td style="color:#dc2626;">2.37</td><td style="color:#dc2626;">26.9%</td><td>303.6</td><td>3.66</td><td>1.54</td><td>23.77天</td><td>253</td><td title="交易工具, 现货, 闪兑, 合约, 期权 等19个">19</td></tr>
+<tr><td style="text-align:left;font-weight:600;">风控</td><td style="color:#f59e0b;font-weight:500;">合规风控需求</td><td>64</td><td style="font-weight:700;color:#dc2626;">163.1</td><td style="color:#dc2626;">2.55</td><td style="color:#dc2626;">28.6%</td><td>244.2</td><td>3.82</td><td>1.5</td><td>31.88天</td><td>118</td><td title="交易工具, 现货, 合约, 期权, 统一账户 等15个">15</td></tr>
+<tr><td style="text-align:left;font-weight:600;">稳定性提升</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>67</td><td style="font-weight:700;color:#dc2626;">156.3</td><td style="color:#dc2626;">2.33</td><td style="color:#dc2626;">29.8%</td><td>339.2</td><td>5.06</td><td>2.17</td><td>19.66天</td><td>60</td><td title="用户中心, 交易工具, 现货, 合约, 统一账户 等16个">16</td></tr>
+<tr><td style="text-align:left;font-weight:600;">技术债</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>31</td><td style="font-weight:700;color:#dc2626;">85.1</td><td style="color:#dc2626;">2.75</td><td style="color:#dc2626;">29.8%</td><td>187.8</td><td>6.06</td><td>2.21</td><td>24.26天</td><td>103</td><td title="交易工具, 现货, 合约, 期权, 统一账户 等13个">13</td></tr>
+<tr><td style="text-align:left;font-weight:600;">合规</td><td style="color:#f59e0b;font-weight:500;">合规风控需求</td><td>56</td><td style="font-weight:700;color:#dc2626;">68.4</td><td style="color:#dc2626;">1.22</td><td style="color:#dc2626;">16.5%</td><td>182.5</td><td>3.26</td><td>2.67</td><td>20.5天</td><td>87</td><td title="现货, 合约, 行情中台, 理财, 打新 等12个">12</td></tr>
+<tr><td style="text-align:left;font-weight:600;">空</td><td style="color:#6b7280;font-weight:500;">其他需求</td><td>42</td><td style="font-weight:700;color:#dc2626;">55.4</td><td style="color:#dc2626;">1.32</td><td style="color:#dc2626;">30.3%</td><td>92.1</td><td>2.19</td><td>1.66</td><td>24.48天</td><td>187</td><td title="交易工具, 现货, 闪兑, 合约, 统一账户 等14个">14</td></tr>
+<tr><td style="text-align:left;font-weight:600;">SEO</td><td style="color:#3b82f6;font-weight:500;">产品需求</td><td>19</td><td style="font-weight:700;color:#dc2626;">38.8</td><td style="color:#dc2626;">2.04</td><td style="color:#dc2626;">17.0%</td><td>153.9</td><td>8.1</td><td>3.97</td><td>21.11天</td><td>120</td><td title="交易工具, 现货, 行情中台, 理财, 返佣 等9个">9</td></tr>
+<tr><td style="text-align:left;font-weight:600;">系统安全</td><td style="color:#f59e0b;font-weight:500;">合规风控需求</td><td>21</td><td style="font-weight:700;color:#dc2626;">34.5</td><td style="color:#dc2626;">1.64</td><td style="color:#dc2626;">25.4%</td><td>86.2</td><td>4.1</td><td>2.5</td><td>30.29天</td><td>49</td><td title="交易工具, 现货, 统一账户, 理财, 资管 等11个">11</td></tr>
+<tr><td style="text-align:left;font-weight:600;">监控告警</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>5</td><td style="font-weight:700;color:#dc2626;">12.5</td><td style="color:#dc2626;">2.5</td><td style="color:#dc2626;">36.2%</td><td>19.5</td><td>3.9</td><td>1.56</td><td>15.0天</td><td>0</td><td title="统一账户, 资管, 社交, 增长工具">4</td></tr>
+<tr><td style="text-align:left;font-weight:600;">降本增效</td><td style="color:#10b981;font-weight:500;">技术需求</td><td>2</td><td style="font-weight:700;color:#dc2626;">2.2</td><td style="color:#dc2626;">1.1</td><td style="color:#dc2626;">17.6%</td><td>8.5</td><td>4.25</td><td>3.86</td><td>32.5天</td><td>8</td><td title="KYC, 社交">2</td></tr>
+</tbody></table></div></div>
+
+<!-- 4. R/T 值分布汇总（按范围和业务线） -->
+<div class="section">
+<div class="section-title">R/T 值分布汇总（按范围和业务线）</div>
+<div style="overflow-x:auto;">
+<table style="width:100%;border-collapse:collapse;font-size:12px;">
+<thead><tr style="background:#0e7490;color:#fff;"><th style="padding:10px 8px;text-align:left;white-space:nowrap;">R/T 范围</th><th style="padding:10px 8px;text-align:center;">人数</th><th style="padding:10px 8px;text-align:left;">业务线分布</th><th style="padding:10px 8px;text-align:left;">人员明细</th></tr></thead>
+<tbody>
+<tr style="background:#fef2f2;border-bottom:1px solid #e2e8f0;"><td style="padding:10px 8px;font-weight:600;color:#dc2626;">R/T < 1</td><td style="padding:10px 8px;text-align:center;font-weight:700;color:#dc2626;">13</td><td style="padding:10px 8px;font-size:11px;color:#64748b;">PAY(1), 交易工具(1), 合约(7), 增长工具(3), 期权(1), 核心交易(4), 现货(7), 统一账户(5), 行情中台(6), 资管(1), 闪兑(1)</td><td style="padding:10px 8px;font-size:11px;"><span style="color:#dc2626;font-weight:600;">Gerrard:</span> Mandyee-QC(0.78), Peyton-QC(0.95)<br><span style="color:#059669;font-weight:600;">Miao:</span> darker-qc(0.69)<br><span style="color:#2563eb;font-weight:600;">Rock:</span> vlan-qc(0.14), yuliana-QC(0.29), walter-qc(0.5), geoffrey-QC(0.86), alice-QC(0.86)<br><span style="color:#7c3aed;font-weight:600;">Tao:</span> windy-QC(0.23), yan-QC(0.25), lucky-QC(0.68), Tank-QC(0.8), Chirs-QC(0.85)</td></tr>
+<tr style="background:#fff;border-bottom:1px solid #e2e8f0;"><td style="padding:10px 8px;font-weight:600;color:#f59e0b;">1 ≤ R/T < 1.5</td><td style="padding:10px 8px;text-align:center;font-weight:700;color:#f59e0b;">17</td><td style="padding:10px 8px;font-size:11px;color:#64748b;">交易工具(3), 分站(1), 合约(4), 增长工具(5), 平台基建(2), 打新(2), 期权(1), 核心交易(2), 现货(5), 理财(3), 用户旅程(1), 管理中台(1), 统一账户(4), 营销活动(2), 行情中台(4), 资产(1), 资管(5), 闪兑(1), WEB3-Web3(1)</td><td style="padding:10px 8px;font-size:11px;"><span style="color:#0891b2;font-weight:600;">Anders:</span> sangni-QC(1.03)<br><span style="color:#dc2626;font-weight:600;">Gerrard:</span> Gus-QC(1.19), leaf-qc(1.33), vevina-qc(1.45), Crystal-QC(1.48)<br><span style="color:#059669;font-weight:600;">Miao:</span> cathy-QC(1.21)<br><span style="color:#db2777;font-weight:600;">Monty:</span> Beyonce-QC(1.1), marek-QC(1.2), corbin-qc(1.3), wayne-qc(1.33)<br><span style="color:#2563eb;font-weight:600;">Rock:</span> luna-QC(1.01), zephyr-qc(1.11), Jovie-QC(1.14), Yann-QC(1.2), Quillon-QC(1.23), caesar-QC(1.4)<br><span style="color:#7c3aed;font-weight:600;">Tao:</span> chovy-QC(1.16)</td></tr>
+<tr style="background:#fff;border-bottom:1px solid #e2e8f0;"><td style="padding:10px 8px;font-weight:600;color:#10b981;">1.5 ≤ R/T < 2</td><td style="padding:10px 8px;text-align:center;font-weight:700;color:#10b981;">42</td><td style="padding:10px 8px;font-size:11px;color:#64748b;">KYC(3), PAY(1), 交易工具(6), 分站(4), 合约(13), 增长工具(10), 平台基建(3), 打新(5), 期权(3), 核心交易(9), 现货(10), 理财(7), 用户中心(1), 用户旅程(7), 管理中台(4), 统一账户(13), 营销活动(4), 行情中台(10), 资产(7), 资管(5), 返佣(4), 闪兑(3), WEB3-Web3(1)</td><td style="padding:10px 8px;font-size:11px;"><span style="color:#0891b2;font-weight:600;">Anders:</span> lucas-QC(1.73)<br><span style="color:#dc2626;font-weight:600;">Gerrard:</span> Mya-QC(1.51), dory-qc(1.67), cary-QC(1.72), rica-QC(1.73), kent-QC(1.77), Crary-QC(1.77), maya-qc(1.82), Cleo-QC(1.85), Helen-QC(1.88), Mervyn-QC(1.93), nia-QC(1.94)<br><span style="color:#d97706;font-weight:600;">Jash:</span> Emilia-QC(1.52), Carleen-QC(1.7), ekko-qc(1.96)<br><span style="color:#059669;font-weight:600;">Miao:</span> Chrisntin-QC(1.55), anny-QC(1.68), Panthea-QC(1.69), Sasa-QC(1.88), wendy-QC(1.96)<br><span style="color:#db2777;font-weight:600;">Monty:</span> Sammy-QC(1.58), june-QC(1.63), mignon-QC(1.74), check-QC(1.81), thesky-QC(1.84)<br><span style="color:#2563eb;font-weight:600;">Rock:</span> stella-QC(1.55), Elisa-QC(1.55), saxon-QC(1.55), hattie-QC(1.56), grace-QC(1.57), gia-qc(1.63), Dagger-QC(1.66), Malcolm-QC(1.71), rae-QC(1.77), viola-qc(1.78), flower-qc(1.83), Nian-QC(1.88), ivy-qc(1.92)<br><span style="color:#7c3aed;font-weight:600;">Tao:</span> eris-qc(1.5), yahao-QC(1.76), Alixe-QC(1.88), Jans-QC(1.96)</td></tr>
+<tr style="background:#fff;border-bottom:1px solid #e2e8f0;"><td style="padding:10px 8px;font-weight:600;color:#0ea5e9;">2 ≤ R/T < 2.5</td><td style="padding:10px 8px;text-align:center;font-weight:700;color:#0ea5e9;">8</td><td style="padding:10px 8px;font-size:11px;color:#64748b;">合约(1), 增长工具(3), 平台基建(1), 打新(3), 期权(1), 核心交易(3), 现货(2), 理财(3), 用户旅程(1), 管理中台(1), 统一账户(3), 营销活动(1), 行情中台(1), 资产(3), 资管(1), 返佣(1)</td><td style="padding:10px 8px;font-size:11px;"><span style="color:#dc2626;font-weight:600;">Gerrard:</span> matinal-QC(2.01), freddy-QC(2.01), shining-qc(2.03), arya-qc(2.26)<br><span style="color:#059669;font-weight:600;">Miao:</span> nick-QC(2.04), oscar-QC(2.1), lim-qc(2.49)<br><span style="color:#7c3aed;font-weight:600;">Tao:</span> kiana-QC(2.08)</td></tr>
+<tr style="background:#fff;border-bottom:1px solid #e2e8f0;"><td style="padding:10px 8px;font-weight:600;color:#6366f1;">R/T ≥ 2.5</td><td style="padding:10px 8px;text-align:center;font-weight:700;color:#6366f1;">25</td><td style="padding:10px 8px;font-size:11px;color:#64748b;">DATA(1), KYC(2), PAY(5), VIP(1), 交易风控(1), 分站(1), 合约(1), 增长工具(3), 平台基建(5), 广场(2), 打新(4), 期权(1), 核心交易(1), 现货(1), 理财(3), 用户中心(2), 用户旅程(4), 社交(6), 管理中台(2), 统一账户(2), 营销活动(3), 行情中台(2), 资产(3), 闪兑(2)</td><td style="padding:10px 8px;font-size:11px;"><span style="color:#0891b2;font-weight:600;">Anders:</span> clayen-qc(4.08)<br><span style="color:#dc2626;font-weight:600;">Gerrard:</span> joe-QC(2.64), cheney-QC(2.65), daphne-qc(2.94)<br><span style="color:#d97706;font-weight:600;">Jash:</span> ace-QC(2.67), sofia-QC(2.92), Aimi-QC(3.0), langlang-QC(3.05), cheson-qc(3.06), Gina-QC(3.13), witta-qc(3.49), Week-QC(3.5), lenka-QC(3.83), rina-QC(3.9), dorothy-qc(4.17), Lumina-QC(4.68), laoshuang-QC(22.0)<br><span style="color:#059669;font-weight:600;">Miao:</span> Susie-QC(2.61), aaron-QC(2.62), Iris-QC(3.4), anli-QC(3.51), kaka-qc(4.36), lora-QC(4.52)<br><span style="color:#2563eb;font-weight:600;">Rock:</span> Fancy-QC(3.29)<br><span style="color:#7c3aed;font-weight:600;">Tao:</span> Five-QC(5.0)</td></tr>
+</tbody></table></div></div>
+
+</div>
+
+<script>
+(function() {
+    function _testReportTryInit() {
+        if (typeof echarts === 'undefined') { setTimeout(_testReportTryInit, 60); return; }
+        _testReportDoInit();
+    }
+    function _testReportDoInit() {
+var months = ['2025-10', '2025-11', '2025-12', '2026-01', '2026-02'];
+var monthTotals = [1960, 4404, 4938, 4623, 3157];
+var monthTestWork = [804.2, 1596.5, 1729.0, 1727.0, 1043.2];
+
+// 0. 测试相关工时占比趋势图
+(function() {
+    var testPctEl = document.getElementById('chartTestWorkPctTrend');
+    if (!testPctEl) return;
+    var testPctChart = echarts.init(testPctEl);
+    
+    var testPcts = months.map(function(m, i) {
+        var total = monthTotals[i] || 0;
+        var test = monthTestWork[i] || 0;
+        return total > 0 ? Math.round(test / total * 1000) / 10 : 0;
+    });
+    var avgPct = testPcts.length ? testPcts.reduce(function(a, b) { return a + b; }, 0) / testPcts.length : 0;
+    
+    testPctChart.setOption({
+        title: { 
+            text: '测试相关工时占比趋势', 
+            subtext: '口径：QC用例设计 + 测试 + 预发测试',
+            left: 'center', 
+            top: 5,
+            textStyle: { fontSize: 14, color: '#b91c1c', fontWeight: 700 },
+            subtextStyle: { fontSize: 10, color: '#94a3b8' }
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter: function(params) {
+                var p = params[0];
+                var idx = p.dataIndex;
+                var diff = testPcts[idx] - avgPct;
+                var diffStr = diff >= 0 ? '+' + diff.toFixed(1) : diff.toFixed(1);
+                return '<b>' + p.axisValue + '</b><br/>' +
+                    '测试相关工时占比: <b style="color:#dc2626;">' + p.value + '%</b><br/>' +
+                    '测试相关工时: ' + Math.round(monthTestWork[idx]) + ' 人天<br/>' +
+                    '总工时: ' + Math.round(monthTotals[idx]) + ' 人天<br/>' +
+                    '<span style="color:#64748b;">vs 均值 ' + avgPct.toFixed(1) + '%: <b>' + diffStr + ' pp</b></span>';
+            }
+        },
+        grid: { left: 50, right: 30, top: 50, bottom: 40 },
+        xAxis: { type: 'category', data: months, axisLabel: { fontSize: 11 } },
+        yAxis: { 
+            type: 'value', 
+            name: '占比 %', 
+            axisLabel: { fontSize: 11, formatter: '{value}%' },
+            min: function(v) { return Math.floor(v.min - 2); },
+            max: function(v) { return Math.ceil(v.max + 2); }
+        },
+        series: [
+            {
+                name: '测试工时占比',
+                type: 'line',
+                data: testPcts,
+                symbol: 'circle',
+                symbolSize: 14,
+                lineStyle: { color: '#dc2626', width: 4, shadowColor: 'rgba(220,38,38,0.3)', shadowBlur: 8 },
+                itemStyle: { color: '#dc2626', borderColor: '#fff', borderWidth: 3 },
+                areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(220,38,38,0.25)' }, { offset: 1, color: 'rgba(220,38,38,0.02)' }] } },
+                label: { 
+                    show: true, 
+                    formatter: function(p) {
+                        var diff = testPcts[p.dataIndex] - avgPct;
+                        var arrow = diff > 0 ? '↑' : (diff < 0 ? '↓' : '');
+                        return p.value + '%\n' + arrow;
+                    }, 
+                    fontSize: 12, 
+                    fontWeight: 700, 
+                    color: '#b91c1c',
+                    backgroundColor: '#fef2f2',
+                    padding: [4, 8],
+                    borderRadius: 6,
+                    position: 'top'
+                },
+                markLine: {
+                    silent: true,
+                    symbol: 'none',
+                    lineStyle: { color: '#94a3b8', type: 'dashed', width: 2 },
+                    label: { formatter: '均值 {c}%', fontSize: 11, color: '#64748b', position: 'end' },
+                    data: [{ type: 'average', name: '均值' }]
+                },
+                markArea: {
+                    silent: true,
+                    itemStyle: { color: 'rgba(16,185,129,0.08)' },
+                    data: [[{ yAxis: 30 }, { yAxis: 40 }]],
+                    label: { show: true, formatter: '健康区间\n30%~40%', position: 'insideRight', fontSize: 10, color: '#059669' }
+                }
+            }
+        ]
+    });
+    
+    window.addEventListener('resize', function() { testPctChart.resize(); });
+})();
+
+// 1. 各阶段工期逐月趋势（堆叠柱状图）
+var monthly = {
+    '2025-10': { '需求阶段': 11.7, '研发阶段': 7.8, '测试阶段': 4.1, '预发测试': 1.0, '发布上线': 2.6 },
+    '2025-11': { '需求阶段': 11.9, '研发阶段': 9.1, '测试阶段': 3.8, '预发测试': 1.1, '发布上线': 3.2 },
+    '2025-12': { '需求阶段': 13.2, '研发阶段': 6.3, '测试阶段': 4.0, '预发测试': 1.3, '发布上线': 3.2 },
+    '2026-01': { '需求阶段': 15.2, '研发阶段': 11.9, '测试阶段': 4.1, '预发测试': 1.5, '发布上线': 3.6 },
+    '2026-02': { '需求阶段': 15.8, '研发阶段': 9.1, '测试阶段': 4.7, '预发测试': 1.2, '发布上线': 4.3 }
+};
+var stages = ['需求阶段', '研发阶段', '测试阶段', '预发测试', '发布上线'];
+var colors = ['#7c3aed', '#0369a1', '#0ea5e9', '#f59e0b', '#10b981'];
+var testPhaseData = months.map(function(m) { return monthly[m]['测试阶段']; });
+
+var scheduleChart = echarts.init(document.getElementById('chartScheduleMonthly'));
+var barSeries = stages.map(function(s, i) {
+    return {
+        name: s, type: 'bar', stack: 'total',
+        data: months.map(function(m) { return monthly[m][s]; }),
+        itemStyle: { color: colors[i] },
+        label: { show: true, position: 'inside', formatter: function(p) { return p.value >= 1 ? p.value.toFixed(1) : ''; }, fontSize: 10, color: '#fff', fontWeight: 600 }
+    };
+});
+barSeries.push({
+    name: '测试阶段趋势', type: 'line', data: testPhaseData,
+    symbol: 'circle', symbolSize: 6,
+    lineStyle: { color: '#dc2626', width: 2, type: 'dashed' },
+    itemStyle: { color: '#dc2626' },
+    z: 10
+});
+scheduleChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: stages.concat(['测试阶段趋势']), top: 0, textStyle: { fontSize: 10 }, itemWidth: 14, itemHeight: 10 },
+    grid: { left: 45, right: 15, top: 40, bottom: 25 },
+    xAxis: { type: 'category', data: months, axisLabel: { fontSize: 11 } },
+    yAxis: { type: 'value', name: '天', axisLabel: { fontSize: 10 }, max: 40 },
+    series: barSeries
+});
+
+// 2. 按月各阶段工时占比（百分比堆叠 + 测试占比折线）
+var effortData = {
+    '2025-10': { '设计评审': 4.9, '研发': 54.0, 'QC用例': 5.6, '测试': 28.0, '预发': 7.5 },
+    '2025-11': { '设计评审': 4.7, '研发': 59.0, 'QC用例': 4.2, '测试': 24.5, '预发': 7.6 },
+    '2025-12': { '设计评审': 4.8, '研发': 60.2, 'QC用例': 3.9, '测试': 23.2, '预发': 7.9 },
+    '2026-01': { '设计评审': 5.1, '研发': 57.6, 'QC用例': 3.3, '测试': 25.6, '预发': 8.4 },
+    '2026-02': { '设计评审': 4.5, '研发': 62.4, 'QC用例': 3.1, '测试': 22.3, '预发': 7.6 }
+};
+var effortPhases = ['设计评审', '研发', 'QC用例', '测试', '预发'];
+var effortColors = ['#0ea5e9', '#38bdf8', '#7dd3fc', '#0369a1', '#0284c7'];
+var testPctData = months.map(function(m) { return effortData[m]['QC用例'] + effortData[m]['测试'] + effortData[m]['预发']; });
+
+var phasePctChart = echarts.init(document.getElementById('chartMonthlyPhasePct'));
+var pctSeries = effortPhases.map(function(p, i) {
+    return {
+        name: p, type: 'bar', stack: 'total',
+        data: months.map(function(m) { return effortData[m][p]; }),
+        itemStyle: { color: effortColors[i] },
+        label: { show: true, position: 'inside', formatter: function(params) { return params.value >= 5 ? params.value + '%' : ''; }, fontSize: 10, color: '#fff' }
+    };
+});
+pctSeries.push({
+    name: '测试占比趋势', type: 'line', yAxisIndex: 1,
+    data: testPctData,
+    symbol: 'circle', symbolSize: 8,
+    lineStyle: { color: '#dc2626', width: 2 },
+    itemStyle: { color: '#dc2626' },
+    label: { show: true, formatter: function(p) { return p.value.toFixed(1) + '%'; }, fontSize: 10, color: '#dc2626', position: 'top' },
+    z: 10
+});
+phasePctChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: effortPhases.concat(['测试占比趋势']), top: 0, textStyle: { fontSize: 10 }, itemWidth: 14, itemHeight: 10 },
+    grid: { left: 45, right: 45, top: 40, bottom: 25 },
+    xAxis: { type: 'category', data: months, axisLabel: { fontSize: 11 } },
+    yAxis: [
+        { type: 'value', name: '占比(%)', max: 100, axisLabel: { fontSize: 10 } },
+        { type: 'value', name: '测试占比(%)', scale: true, axisLabel: { fontSize: 10, color: '#dc2626' }, splitLine: { show: false } }
+    ],
+    series: pctSeries
+});
+
+window.addEventListener('resize', function() {
+    scheduleChart.resize();
+    phasePctChart.resize();
+});
+
+    } // end _testReportDoInit
+    if (document.readyState === 'complete') { _testReportTryInit(); }
+    else { window.addEventListener('load', _testReportTryInit); }
+})();
+</script>
+</body>
+</html>
