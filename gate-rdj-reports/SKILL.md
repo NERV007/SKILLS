@@ -9,7 +9,8 @@ description: >-
   generate_chanfeng_station_report、qc_unified_roster_report、generate_rt_merge_report、
   build_meegle_report_html、主站分站效能报告、8bbOlLnNU、按月部门汇总、
   RD-Efficiency-Portfolio、产研效能报告、build_portfolio_single_html、
-  portfolio_rd_styles、rdj_delivery_blocks、portfolio_raw_data、portfolio_hour_override、
+  portfolio_rd_styles、portfolio_rt_merge、portfolio_glossary、portfolio_validate、
+  rdj_delivery_blocks、portfolio_raw_data、portfolio_hour_override、templates/portfolio、
   工时修正、localStorage、refresh_portfolio_pipeline、verify_portfolio_raw_data、
   有QC参与即算、整单不分摊、按月折叠、需求明细、Story ID、depts_for_qc、role-s-qa，
   or asks to refresh/regenerate these reports.
@@ -70,7 +71,7 @@ gate-rdj-reports/
 │   ├── portfolio_dept_stats.py          ← 人员编制 Tab（QC 去重）
 │   ├── gate_rdj_metrics.py              ← 核心口径（含 corrected_rd）
 │   └── …（Gate-RDJ / AI / 分站 / QC / Meegle / RT 等）
-├── templates/            ← Gate-RDJ-12 四件套、P9 参考、rt_merge_report.html（见 templates/README.md）
+├── templates/            ← Gate-RDJ-12 四件套、P9、rt_merge；全景见 templates/portfolio/
 └── vendor/               ← echarts-5.4.3.min.js
 
 仓库根/
@@ -242,6 +243,29 @@ PYTHONPATH=gate-rdj-reports/scripts python3 gate-rdj-reports/scripts/verify_port
 python3 scripts/build_portfolio_single_html.py
 PYTHONPATH=scripts python3 scripts/verify_portfolio_raw_data.py
 ```
+
+### RD-Efficiency-Portfolio 构建模块（均在 `scripts/`）
+
+全景单页 **无独立 Jinja/HTML 模板文件**；由下列 Python 模块拼装，CSS 在 `portfolio_rd_styles.py`。  
+详细上游输入、业务仓库布局见 **`templates/portfolio/README.md`**；UI 参考壳 `templates/portfolio/RD-Efficiency-Portfolio.shell.html`。
+
+| 脚本 | 职责 |
+|------|------|
+| `build_portfolio_single_html.py` | **主入口** → 写出 `RD-Efficiency-Portfolio.html` |
+| `portfolio_rd_styles.py` | 全景 CSS（Tab、按月折叠、工时修正弹窗） |
+| `portfolio_raw_data.py` | 原始数据 Tab、总览需求明细 |
+| `portfolio_hour_override.py` | 工时修正 Tab / 弹窗 / 部门 R/T 联动 |
+| `portfolio_formula_core.py` | 主站 R/T 公式说明块 |
+| `portfolio_glossary.py` | 附录指标表 |
+| `portfolio_rt_merge.py` | RT 四源总览、部门×四源表 |
+| `portfolio_dept_stats.py` | 人员编制 Tab |
+| `portfolio_ai_alpha.py` | AI / Alpha Tab 抽取 |
+| `portfolio_data_reconcile.py` | 总览横向对账 |
+| `portfolio_validate.py` | 构建前校验 |
+| `verify_portfolio_raw_data.py` | 构建后口径校验 |
+| `rdj_delivery_blocks.py` | 主站交付周期 / 四象限块 |
+| `refresh_portfolio_pipeline.sh` | 全链刷新（含本页构建） |
+| `_paths.py` | 包根 `gate-rdj-reports/`；业务数据在上一级 `GATE_REPORTS_ROOT` |
 
 ### 改什么改哪里
 

@@ -54,6 +54,8 @@ PYTHONPATH=scripts python3 scripts/verify_portfolio_raw_data.py
 | `portfolio_dept_stats.py` | 人员编制 Tab |
 | `gate_rdj_metrics.py` | 指标口径（`corrected_rd`、`split_qc_field_roles`） |
 
+**全景单页 `RD-Efficiency-Portfolio.html`**：见 `templates/portfolio/README.md`（`build_portfolio_single_html.py` + 全部 `portfolio_*.py`）。
+
 ## Gate-RDJ 单源
 
 ```bash

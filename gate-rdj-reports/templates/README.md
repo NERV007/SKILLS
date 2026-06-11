@@ -1,7 +1,7 @@
 # HTML 模板（Gate-RDJ 单源报告）
 
 由 `scripts/generate_gate_rdj_from_csv.py` / `gate_rdj_from_xlsx.py` 读取并注入数据。  
-**全景单页** `RD-Efficiency-Portfolio.html` 不在此目录生成，见 `build_portfolio_single_html.py`。
+**全景单页** `RD-Efficiency-Portfolio.html` 由 `scripts/build_portfolio_single_html.py` 生成；模块清单与参考壳见 **`portfolio/README.md`**、`portfolio/RD-Efficiency-Portfolio.shell.html`。
 
 | 文件 | 用途 |
 |------|------|
