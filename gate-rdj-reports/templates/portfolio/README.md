@@ -47,9 +47,13 @@ python3 gate-rdj-reports/scripts/build_portfolio_single_html.py
 | `refresh_portfolio_pipeline.sh` | 全链刷新（Gate-RDJ → … → 全景） |
 | `_paths.py` | 路径：`gate-rdj-reports/` 为包根，`../` 为业务数据仓库根 |
 
-## 参考静态壳（非生成器）
+## 参考与示例
 
-`RD-Efficiency-Portfolio.shell.html`：早期 **UI 骨架参考**（静态 Tab/样式 demo）。  
+| 文件 | 用途 |
+|------|------|
+| `RD-Efficiency-Portfolio.shell.html` | 早期 UI 骨架参考（静态 demo） |
+| `../examples/RD-Efficiency-Portfolio.html` | **完整构建产物示例**（可直接 `open` 预览） |
+
 现行产物以 `portfolio_rd_styles.py` + `build_portfolio_single_html.py` 为准；改样式优先改 Python 模块后重跑构建。
 
 ## 业务仓库推荐布局

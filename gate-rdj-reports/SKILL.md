@@ -72,6 +72,7 @@ gate-rdj-reports/
 │   ├── gate_rdj_metrics.py              ← 核心口径（含 corrected_rd）
 │   └── …（Gate-RDJ / AI / 分站 / QC / Meegle / RT 等）
 ├── templates/            ← Gate-RDJ-12 四件套、P9、rt_merge；全景见 templates/portfolio/
+├── examples/             ← RD-Efficiency-Portfolio.html 完整构建示例
 └── vendor/               ← echarts-5.4.3.min.js
 
 仓库根/
@@ -247,7 +248,7 @@ PYTHONPATH=scripts python3 scripts/verify_portfolio_raw_data.py
 ### RD-Efficiency-Portfolio 构建模块（均在 `scripts/`）
 
 全景单页 **无独立 Jinja/HTML 模板文件**；由下列 Python 模块拼装，CSS 在 `portfolio_rd_styles.py`。  
-详细上游输入、业务仓库布局见 **`templates/portfolio/README.md`**；UI 参考壳 `templates/portfolio/RD-Efficiency-Portfolio.shell.html`。
+详细上游输入、业务仓库布局见 **`templates/portfolio/README.md`**；UI 参考壳 `templates/portfolio/RD-Efficiency-Portfolio.shell.html`；**完整示例** `examples/RD-Efficiency-Portfolio.html`。
 
 | 脚本 | 职责 |
 |------|------|
